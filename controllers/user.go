@@ -25,7 +25,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 	user := models.User{Name: input.Name, Surname: input.Surname}
-	db.DB.Create(user)
+	db.DB.Create(&user)
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
@@ -57,8 +57,11 @@ func UpdateUser(c *gin.Context) {
 }
 
 func DeleteUser(c *gin.Context) {
-	var user models.User
 	id := c.Param("id")
-	db.DB.Delete(&user, id)
+	result := db.DB.Delete(&models.User{}, id)
+	if result.Error != nil {
+		c.JSON(http.StatusOK, gin.H{"error": result.Error.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": "user deleted from db"})
 }

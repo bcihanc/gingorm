@@ -4,6 +4,7 @@ import (
 	"gingorm/controllers"
 	"gingorm/db"
 	"github.com/gin-gonic/gin"
+	"log"
 )
 
 func main() {
@@ -14,9 +15,13 @@ func main() {
 
 	authorized.GET("/user", controllers.GetUsers)
 
-	r.GET("/user/:id", controllers.GetUserById)
 	r.POST("/user", controllers.CreateUser)
-	r.POST("/user/update/:id", controllers.UpdateUser)
-	r.GET("/user/delete/:id", controllers.DeleteUser)
-	r.Run()
+	r.GET("/user/:id", controllers.GetUserById)
+	r.PUT("/user/:id", controllers.UpdateUser)
+	r.DELETE("/user/:id", controllers.DeleteUser)
+	err := r.Run()
+
+	if err != nil {
+		log.Panicln("gin failed", err)
+	}
 }
