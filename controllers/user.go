@@ -29,3 +29,36 @@ func CreateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
+func GetUserById(c *gin.Context) {
+	var user models.User
+	id := c.Param("id")
+	db.DB.First(&user, id)
+	c.JSON(http.StatusOK, gin.H{"data": user})
+}
+
+func UpdateUser(c *gin.Context) {
+	var user models.User
+	id := c.Param("id")
+
+	var input createUserInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	db.DB.First(&user, id)
+
+	user.Name = input.Name
+	user.Surname = input.Surname
+
+	db.DB.Save(&user)
+	c.JSON(http.StatusOK, gin.H{"data": user})
+}
+
+func DeleteUser(c *gin.Context) {
+	var user models.User
+	id := c.Param("id")
+	db.DB.Delete(&user, id)
+	c.JSON(http.StatusOK, gin.H{"data": "user deleted from db"})
+}

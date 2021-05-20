@@ -4,16 +4,19 @@ import (
 	"gingorm/controllers"
 	"gingorm/db"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func main() {
 	r := gin.Default()
 	db.ConnectDatabase()
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"data": "Hello World."})
-	})
-	r.GET("/users", controllers.GetUsers)
-	r.POST("/users", controllers.CreateUser)
+
+	authorized := r.Group("/", gin.BasicAuth(gin.Accounts{"admin": "password"}))
+
+	authorized.GET("/user", controllers.GetUsers)
+
+	r.GET("/user/:id", controllers.GetUserById)
+	r.POST("/user", controllers.CreateUser)
+	r.POST("/user/update/:id", controllers.UpdateUser)
+	r.GET("/user/delete/:id", controllers.DeleteUser)
 	r.Run()
 }
