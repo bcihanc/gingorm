@@ -1,0 +1,41 @@
+definitions:
+  models.SessionInput:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    required:
+    - key
+    - value
+    type: object
+info:
+  contact: {}
+paths:
+  /session:
+    post:
+      description: create new variable in session description
+      parameters:
+      - description: SessionInput
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.SessionInput'
+      summary: create new variable in session
+  /session/{key}:
+    get:
+      description: create new variable in session description
+      parameters:
+      - description: key is stored value
+        in: path
+        name: key
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SessionInput'
+      summary: create new variable in session
+swagger: "2.0"

@@ -3,14 +3,10 @@ package controllers
 import (
 	"gingorm/db"
 	"gingorm/models"
+	"gingorm/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
-
-type createUserInput struct {
-	Name    string `json:"name" binding:"required"`
-	Surname string `json:"surname" binding:"required"`
-}
 
 func GetUsers(c *gin.Context) {
 	var users []models.User
@@ -18,13 +14,18 @@ func GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": users})
 }
 
+func AuthorizedData(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"data": "authorized"})
+}
+
 func CreateUser(c *gin.Context) {
-	var input createUserInput
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var input models.UserLogin
+	if bindErr := c.ShouldBindJSON(&input); bindErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": bindErr.Error()})
 		return
 	}
-	user := models.User{Name: input.Name, Surname: input.Surname}
+	hashedPassword, _ := utils.HashPassword(input.Password)
+	user := models.User{Email: input.Email, Password: hashedPassword}
 	db.DB.Create(&user)
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
@@ -36,11 +37,34 @@ func GetUserById(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
+func LoginWithEmailAndPasswordEndPoint(c *gin.Context) {
+	var loginInput models.UserLogin
+	if bindErr := c.ShouldBindJSON(&loginInput); bindErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": bindErr.Error()})
+		return
+	}
+
+	user := models.User{Email: loginInput.Email, Password: loginInput.Password}
+	isPasswordTrue, loginErr := db.LoginWithEmailAndPassword(&user)
+
+	if loginErr != nil {
+		c.JSON(http.StatusOK, gin.H{"error": loginErr.Error()})
+		return
+	}
+
+	if isPasswordTrue {
+		c.JSON(http.StatusOK, gin.H{"data": loginInput})
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"data": "password is wrong"})
+	}
+
+}
+
 func UpdateUser(c *gin.Context) {
 	var user models.User
 	id := c.Param("id")
 
-	var input createUserInput
+	var input models.UserLogin
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -49,8 +73,8 @@ func UpdateUser(c *gin.Context) {
 
 	db.DB.First(&user, id)
 
-	user.Name = input.Name
-	user.Surname = input.Surname
+	user.Email = input.Email
+	user.Password = input.Password
 
 	db.DB.Save(&user)
 	c.JSON(http.StatusOK, gin.H{"data": user})

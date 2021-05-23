@@ -1,0 +1,65 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/session": {
+            "post": {
+                "description": "create new variable in session description",
+                "summary": "create new variable in session",
+                "parameters": [
+                    {
+                        "description": "SessionInput",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SessionInput"
+                        }
+                    }
+                ]
+            }
+        },
+        "/session/{key}": {
+            "get": {
+                "description": "create new variable in session description",
+                "summary": "create new variable in session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "key is stored value",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.SessionInput"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.SessionInput": {
+            "type": "object",
+            "required": [
+                "key",
+                "value"
+            ],
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
