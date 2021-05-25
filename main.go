@@ -12,6 +12,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"log"
+	"net/http"
 	"time"
 )
 
@@ -120,12 +121,17 @@ func main() {
 		}
 
 		auth := r.Group("/auth")
-		auth.POST("jwt", authMiddleware.LoginHandler)
+		auth.POST("token", authMiddleware.LoginHandler)
 
 		// Refresh time can be longer than token timeout
 		auth.GET("/refresh_token", authMiddleware.RefreshHandler)
 
 		auth.Use(authMiddleware.MiddlewareFunc())
+		{
+			auth.GET("/secured", func(c *gin.Context) {
+				c.JSON(http.StatusOK, gin.H{"data": "accessed"})
+			})
+		}
 	}
 
 	if err := r.Run(); err != nil {
